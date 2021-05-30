@@ -12,36 +12,39 @@
     </include>
 
 	<include>
-		<uri>model://probe</uri>
+		<uri>model://exocam</uri>
 		<name>sample_probe</name>
 	</include>
-	<model name='target_stand'>
-		<pose>10 0 0 0 0 0</pose>
+
+	<include>
+		<uri>model://ring</uri>
+		<static>1</static>
+	</include>
+
+	<include>
+		<uri>model://logo</uri>
+		<static>1</static>
+	</include>
+	<!-- <model name='target_stand'>
+		<pose>0 0 0.001 0 0 0</pose>
+		<static>1</static>
 		<link name='target_base_link'>
-			<collision name='target_collision'>
-				<geometry>
-					<cylinder>
-						<radius>1</radius>
-						<length>0.001</length>
-					</cylinder>
-				</geometry>
-			</collision>
 			<visual name='target_visual'>
 				<geometry>
 					<cylinder>
-						<radius>1</radius>
+						<radius>20</radius>
 						<length>0.001</length>
 					</cylinder>
 				</geometry>
 				<material>
-					<script>
-						<name>Gazebo/Green</name>
-						<uri>file://media/materials/scripts/gazebo.material</uri>
-					</script>
-				</material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>1 0.1 0.2 1</diffuse>
+          <specular>0 0 0 0</specular>
+          <emissive>0 0 0 1</emissive>
+        </material>
 			</visual>
 		</link>
-	</model>
+	</model> -->
     
     <physics name='default_physics' default='0' type='ode'>
       <gravity>0 0 -9.8066</gravity>

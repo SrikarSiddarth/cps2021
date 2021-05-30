@@ -34,7 +34,6 @@ class OffboardControl:
         self.chute_detached = False
         self.att = AttitudeTarget()
         self.attach = False
-        self.height = 5
         self.orientation = [0]*3
         self.t = time.time()
 
@@ -48,40 +47,29 @@ class OffboardControl:
 
         self.pose_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, callback=self.pose_callback)
         self.state_sub = rospy.Subscriber('/mavros/state', State, callback=self.state_callback)
-        self.decision = rospy.Subscriber('/data', String, callback=self.set_mode)
 
         self.parachute_pub = rospy.Publisher('parachute_plugin/sample_probe',Bool,queue_size=10)
         self.att_setpoint_pub = rospy.Publisher('/mavros/setpoint_raw/attitude', AttitudeTarget, queue_size=10)
         self.attach_pub = rospy.Publisher('/attach', String, queue_size=10)
 
+        # Use the following line of code to attach the probe to the drone...
+        # self.attach_models('if750a','base_link','sample_probe','base_link')
 
-        self.attach_models('if750a','base_link','sample_probe','base_link')
-
+        # a function that calls other functions based on its mode
         self.controller()
-
-    def set_mode(self, msg):
-        self.mode = str(msg.data)
 
     def pose_callback(self, msg):
         self.curr_pose = msg
         # gets the euler angles (roll, pitch, yaw) from the quaternion values
+        # Note: The angles you get doesn't map the [-pi,pi] range properly and might require some conversion
         self.orientation = euler_from_quaternion((msg.pose.orientation.x,msg.pose.orientation.y,msg.pose.orientation.z,msg.pose.orientation.w))
 
 
     def state_callback(self, msg):
-        if msg.mode == 'OFFBOARD' and self.arm == True:
-            self.is_ready_to_fly = True
-        else:
-            self.take_off()
-
-    def detach_chute(self):
-        try:
-            chuteService = rospy.ServiceProxy('/gazebo/delete_model', DeleteModel)
-            isModeChanged = chuteService(model_name='parachute')
-            self.chute_detached = True
-        except rospy.ServiceException as e:
-            print("service set_mode call failed: %s. OFFBOARD Mode could not be set. Check that GPS is enabled" % e)
-
+        if msg.mode != 'OFFBOARD' or self.arm != True:
+            # take_off
+            self.set_offboard_mode()
+            self.set_arm()
 
     def set_offboard_mode(self):
         rospy.wait_for_service('/mavros/set_mode')
@@ -100,9 +88,6 @@ class OffboardControl:
         except rospy.ServiceException as e:
             print("Service arm call failed: %s" % e)
 
-    def take_off(self):
-        self.set_offboard_mode()
-        self.set_arm()
 
 
     def attach_models(self, model1, link1, model2, link2):
@@ -124,9 +109,9 @@ class OffboardControl:
 
     def retro(self):
         while self.mode == 'RETRO' and not rospy.is_shutdown():
-            self.detach_models('if750a','base_link','sample_probe','base_link')
+            # using the following line of code to detach the probe
+            # self.detach_models('if750a','base_link','sample_probe','base_link')
             self.mode = "LAND"
-            self.t = time.time()
             
 
     def land(self):
@@ -138,8 +123,8 @@ class OffboardControl:
             except rospy.ServiceException as e:
                 print("service set_mode call failed: %s. OFFBOARD Mode could not be set. Check that GPS is enabled" % e)
 
-            if time.time()-self.t>1:                # delay of 0.5s as clearance time so that probe can get away from the drone
-                self.parachute_pub.publish(1)
+            # use the following code to pull up the parachute on the probe so that it lands on the spot!
+            # self.parachute_pub.publish(1)
 
             try:  # prevent garbage in console output when thread is killed
                 rate.sleep()
@@ -159,18 +144,17 @@ class OffboardControl:
 
         while self.mode == "BELLY-FLOP" and not rospy.is_shutdown():
             self.att.header.stamp = rospy.Time.now()
-            self.att.thrust = 0.65
+            # use AttitudeTarget.thrust to lift your quadcopter
+            self.att.thrust = 0.7
+            # use AttitudeTarget.body_rate.y to provide the angular velocity to your quadcopter
             self.att.body_rate.y = 0.0
+            # type_msk = 128 is used for controlling the rate exclusively, you may explore other values too
             self.att.type_mask = 128
 
-            if self.curr_pose.pose.position.z > self.height:
-                self.att.thrust = 1.8
-                self.att.body_rate.y = 8.57
-
-            if self.orientation[1]>0.785:
-                self.att_setpoint_pub.publish(self.att)
-                rate.sleep()
-                self.mode="RETRO"
+            # if (you think the drone is ready to detach the probe):
+            #     self.att_setpoint_pub.publish(self.att)
+            #     rate.sleep()
+            #     self.mode="RETRO"
 
             self.att_setpoint_pub.publish(self.att)
 

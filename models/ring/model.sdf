@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+	<model name="ring">
+		<link name='base_link'>
+      <pose>0 0 0.001 0 0 0</pose>
+			<inertial>
+				<mass>0.1</mass>
+				<inertia>
+				<ixx>0.0004</ixx> <!-- 2/5*m*r^2-->
+				<ixy>0</ixy>
+				<ixz>0</ixz>
+				<iyy>0.0004</iyy><!-- 2/5*m*r^2-->
+				<iyz>0</iyz>
+				<izz>0.0004</izz> <!-- 2/5*m*r^2-->
+				</inertia>
+			</inertial>
+			<self_collide>0</self_collide>
+			<kinematic>0</kinematic>
+			<velocity_decay/>
+			<gravity>1</gravity>
+			<visual name='visual'>
+				<geometry>
+					<mesh>
+						<uri>model://ring/meshes/ring.dae</uri>
+						<scale>20 20 5</scale>
+					</mesh>
+				</geometry>
+				<material>
+					<ambient>0.1 0.1 0.1 1</ambient>
+					<diffuse>0.1 0.1 1 1</diffuse>
+					<specular>0 0 0 0</specular>
+					<emissive>0 0 0 1</emissive>
+				</material>
+			</visual>
+		</link>
+	</model>
+</sdf>

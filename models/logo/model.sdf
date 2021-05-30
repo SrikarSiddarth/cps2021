@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+	<model name="logo">
+		<link name='base_link'>
+			<pose>0 0 0.001 0 0 0</pose>
+			<inertial>
+				<mass>0.1</mass>
+				<inertia>
+				<ixx>0.0004</ixx> <!-- 2/5*m*r^2-->
+				<ixy>0</ixy>
+				<ixz>0</ixz>
+				<iyy>0.0004</iyy><!-- 2/5*m*r^2-->
+				<iyz>0</iyz>
+				<izz>0.0004</izz> <!-- 2/5*m*r^2-->
+				</inertia>
+			</inertial>
+			<gravity>1</gravity>
+			<visual name='visual'>
+				<geometry>
+					<plane><size>4 4</size></plane>
+				</geometry>
+				<material>
+					<script>
+						<name>logo</name>
+						<uri>model://logo/materials/scripts/logo.material</uri>
+						<uri>model://logo/materials/textures</uri>
+					</script>
+				</material>
+			</visual>
+		</link>
+	</model>
+</sdf>
