@@ -35,11 +35,11 @@
 			<collision name='base_link_inertia_collision'>
 			 
 				<geometry>
-					<mesh>
+					<!-- <mesh>
 						<uri>model://exocam/meshes/exocam.obj</uri>
 						<scale>0.001 0.001 0.001</scale>
-					</mesh>
-					<!-- <sphere><radius>0.1</radius></sphere> -->
+					</mesh> -->
+					<sphere><radius>0.13</radius></sphere>
 
 				</geometry>
 				<max_contacts>10</max_contacts>
