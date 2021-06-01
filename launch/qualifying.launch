@@ -12,7 +12,7 @@
     <!-- vehicle model and world -->
     <arg name="est" default="ekf2"/>
     <arg name="vehicle" default="if750a"/>
-    <arg name="world" default="$(find cps_challenge_2021_test)/worlds/qualifying.world"/>
+    <arg name="world" default="$(find cps_challenge_2021)/worlds/qualifying.world"/>
 <!--	<arg name="world" default="$(find parachute)/worlds/test.world"/>-->
     <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
 
@@ -58,7 +58,8 @@
 
 <arg name="optical_rotate" value="0.1 0 0 -$(arg pi/2) 0 -$(arg deg105)" />
 <node pkg="tf" type="static_transform_publisher" name="camera_base_link"
-     args="$(arg optical_rotate) base_link camera_link 100" />  
+     args="$(arg optical_rotate) base_link camera_link 100" />
+
 
 
 </launch>
