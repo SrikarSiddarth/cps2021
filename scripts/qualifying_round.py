@@ -37,6 +37,7 @@ class OffboardControl:
 		self.attach = False
 		self.orientation = [0]*3
 		self.attachFlag = True
+		self.parachuteFlag = True
 
 		# define your services here
 
@@ -111,12 +112,13 @@ class OffboardControl:
 	def retro(self):
 		while self.mode == 'RETRO' and not rospy.is_shutdown():
 			# using the following line of code to detach the probe
-			# self.detach_models('if750a','base_link','sample_probe','base_link')
+			self.detach_models('if750a','base_link','sample_probe','base_link')
 			self.mode = "LAND"
 			
 
 	def land(self):
 		rate = rospy.Rate(15)  # Hz
+		t = time.time()
 		while self.mode == "LAND" and not rospy.is_shutdown():
 			try:
 				flightModeService = rospy.ServiceProxy('/mavros/set_mode', SetMode)
@@ -125,7 +127,9 @@ class OffboardControl:
 				print("service set_mode call failed: %s. OFFBOARD Mode could not be set. Check that GPS is enabled" % e)
 
 			# use the following code to pull up the parachute on the probe so that it lands on the spot!
-			# self.parachute_pub.publish(1)
+			if time.time()-t>1 and self.parachuteFlag:
+				self.parachute_pub.publish(1)
+				self.parachuteFlag = 0
 
 			try:  # prevent garbage in console output when thread is killed
 				rate.sleep()
@@ -133,7 +137,7 @@ class OffboardControl:
 				pass
 
 	def ascend(self):
-		self.des_pose.pose.position.z = 10
+		self.des_pose.pose.position.z = 15
 		rate = rospy.Rate(15)
 		while self.mode=="ASCEND" and not rospy.is_shutdown():
 			self.pose_pub.publish(self.des_pose)
@@ -142,7 +146,8 @@ class OffboardControl:
 				self.attach_models('if750a','base_link','sample_probe','base_link')
 				self.attachFlag = False
 			# if the drone is ready for the throw, change mode to "BELLY-FLOP"
-			# self.mode = "BELLL-FLOP"
+			if self.curr_pose.pose.position.z > 10:
+				self.mode = "BELLY-FLOP"
 			rate.sleep()
 
 	def belly_flop(self):
@@ -161,14 +166,15 @@ class OffboardControl:
 			# use AttitudeTarget.thrust to lift your quadcopter
 			self.att.thrust = 0.7
 			# use AttitudeTarget.body_rate.y to provide the angular velocity to your quadcopter
-			self.att.body_rate.y = 0.0
+			self.att.body_rate.y = 5
 			# type_msk = 128 is used for controlling the rate exclusively, you may explore other values too
 			self.att.type_mask = 128
 
 			# if (you think the drone is ready to detach the probe):
-			#     self.att_setpoint_pub.publish(self.att)
-			#     rate.sleep()
-			#     self.mode="RETRO"
+			if self.orientation[1] > 0.5:
+				self.att_setpoint_pub.publish(self.att)
+				rate.sleep()
+				self.mode="RETRO"
 
 			self.att_setpoint_pub.publish(self.att)
 

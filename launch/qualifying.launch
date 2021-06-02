@@ -59,7 +59,7 @@
 <arg name="optical_rotate" value="0.1 0 0 -$(arg pi/2) 0 -$(arg deg105)" />
 <node pkg="tf" type="static_transform_publisher" name="camera_base_link"
      args="$(arg optical_rotate) base_link camera_link 100" />
-
+<!-- <node pkg="cps_challenge_2021" name="qualifying" type="qualifying_round.py" output="screen"/> -->
 
 
 </launch>
